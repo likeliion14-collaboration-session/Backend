@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
+@Setter
 public class LocationSaveRequest {
 
     @NotNull(message = "userId는 필수입니다.")

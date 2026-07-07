@@ -1,10 +1,11 @@
 package com.likelion_collb.domain.track.service;
 
+import com.likelion_collb.domain.connection.service.ConnectionAccessService;
+import com.likelion_collb.domain.track.dto.TrackPointsResponse;
+import com.likelion_collb.domain.track.dto.response.LocationSaveResponse;
 
 import com.likelion_collb.domain.track.dto.response.LiveLocationResponse;
-import com.likelion_collb.domain.track.dto.response.LocationSaveResponse;
 import com.likelion_collb.domain.track.dto.response.RecordStartResponse;
-import com.likelion_collb.domain.track.dto.response.TrackPointsResponse;
 import com.likelion_collb.domain.track.entity.LiveLocation;
 import com.likelion_collb.domain.track.entity.TrackPoint;
 import com.likelion_collb.domain.track.exception.TrackErrorCode;
@@ -30,6 +31,7 @@ public class TrackService {
     private final TrackPointRepository trackPointRepository;
     private final LiveLocationRepository liveLocationRepository;
     private final UserRepository userRepository;
+    private final ConnectionAccessService connectionAccessService;
 
     @Transactional
     public RecordStartResponse startRecord(Long userId) {
@@ -55,7 +57,6 @@ public class TrackService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 
-        // 1. LiveLocation UPSERT
         LiveLocation liveLocation = liveLocationRepository.findByUser(user).orElse(null);
 
         if (liveLocation == null) {
@@ -69,7 +70,6 @@ public class TrackService {
             liveLocation.updateLocation(latitude, longitude);
         }
 
-        // 2. TrackPoint 무조건 INSERT (필터링 없음)
         TrackPoint trackPoint = TrackPoint.builder()
                 .user(user)
                 .latitude(latitude)
@@ -77,10 +77,6 @@ public class TrackService {
                 .build();
         trackPointRepository.save(trackPoint);
 
-        return convertTrackPointToLocationSaveResponse(trackPoint);
-    }
-
-    private static LocationSaveResponse convertTrackPointToLocationSaveResponse(TrackPoint trackPoint) {
         return LocationSaveResponse.builder()
                 .trackPointId(trackPoint.getId())
                 .latitude(trackPoint.getLatitude())
@@ -93,22 +89,39 @@ public class TrackService {
 
         Long resolvedTargetId = (targetId != null) ? targetId : requesterId;
 
-        // TODO: Connection/Share 도메인 완성되면 여기서 접근 제어 검증 추가
-
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+
+        boolean isPartiallyShared = false;
+        LocalDateTime sharedUntil = null;
+
+        if (!requesterId.equals(resolvedTargetId)) {
+            LocalDateTime cutoff = connectionAccessService.checkAccessAndGetCutoff(requesterId, resolvedTargetId);
+            if (cutoff != null) {
+                isPartiallyShared = true;
+                sharedUntil = cutoff;
+                if (cutoff.isBefore(endOfDay)) {
+                    endOfDay = cutoff;
+                }
+            }
+        }
 
         List<TrackPoint> points = trackPointRepository
                 .findTrackPoints(resolvedTargetId, startOfDay, endOfDay);
 
-        return TrackPointsResponse.from(resolvedTargetId, points);
+        return TrackPointsResponse.from(resolvedTargetId, points, isPartiallyShared, sharedUntil);
     }
 
     public LiveLocationResponse getLiveLocation(Long requesterId, Long targetId) {
 
         Long resolvedTargetId = (targetId != null) ? targetId : requesterId;
 
-        // TODO: Connection/Share 도메인 완성되면 여기서 접근 제어 검증 추가
+        if (!requesterId.equals(resolvedTargetId)) {
+            LocalDateTime cutoff = connectionAccessService.checkAccessAndGetCutoff(requesterId, resolvedTargetId);
+            if (cutoff != null) {
+                throw new CustomException(TrackErrorCode.LIVE_LOCATION_NOT_FOUND);
+            }
+        }
 
         LiveLocation liveLocation = liveLocationRepository.findByUserId(resolvedTargetId)
                 .orElseThrow(() -> new CustomException(TrackErrorCode.LIVE_LOCATION_NOT_FOUND));

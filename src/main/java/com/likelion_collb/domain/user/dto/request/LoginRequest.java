@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 public class LoginRequest {
     @NotBlank(message = "닉네임은 필수입니다.")
     private String nickname;

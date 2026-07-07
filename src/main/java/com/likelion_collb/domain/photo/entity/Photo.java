@@ -36,5 +36,24 @@ public class Photo extends BaseTimeEntity {
 
     private LocalDateTime deletedAt;
 
+    // 코멘트/아이콘 수정
+    public void updateContent(String comment, String pinIcon) {
+        this.comment = comment;
+        this.pinIcon = pinIcon;
+    }
 
+    // 소프트 삭제
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    // 본인 사진인지 확인 (Service에서 쓸 편의 메서드)
+    public boolean isOwnedBy(Long userId) {
+        return this.user.getId().equals(userId);
+    }
+
+    // 위치 정보 존재 여부 (hasLocation 응답 필드용)
+    public boolean hasLocation() {
+        return this.latitude != null && this.longitude != null;
+    }
 }

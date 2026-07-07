@@ -27,4 +27,11 @@ public class Connection extends BaseTimeEntity {
     private User userB;
 
 
+    // 요청자(requesterId) 입장에서 상대방이 누구인지 판단하는 편의 메서드
+    public User getPartner(Long myUserId) {
+        if (userA.getId().equals(myUserId)) {
+            return userB;
+        }
+        return userA;
+    }
 }

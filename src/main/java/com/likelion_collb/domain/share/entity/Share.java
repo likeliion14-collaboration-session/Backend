@@ -33,4 +33,16 @@ public class Share {
     private boolean isShared = true;
 
     private LocalDateTime disabledAt;
+
+    // 공유 끄기
+    public void disable() {
+        this.isShared = false;
+        this.disabledAt = LocalDateTime.now();
+    }
+
+    // 공유 켜기 (컷오프 해제, 끈 기간 기록도 다시 보이게)
+    public void enable() {
+        this.isShared = true;
+        this.disabledAt = null;
+    }
 }

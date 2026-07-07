@@ -20,4 +20,6 @@ public interface TrackPointRepository extends JpaRepository<TrackPoint, Long> {
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
+
+    List<TrackPoint> findAllByUserIdAndCreatedAtBeforeOrderByCreatedAtAsc(Long userId, LocalDateTime until);
 }

@@ -1,13 +1,14 @@
 package com.likelion_collb.domain.track.controller;
 
+import com.likelion_collb.domain.track.dto.TrackPointsResponse;
 import com.likelion_collb.domain.track.dto.request.LocationSaveRequest;
 import com.likelion_collb.domain.track.dto.request.RecordStartRequest;
 import com.likelion_collb.domain.track.dto.response.LiveLocationResponse;
 import com.likelion_collb.domain.track.dto.response.LocationSaveResponse;
 import com.likelion_collb.domain.track.dto.response.RecordStartResponse;
-import com.likelion_collb.domain.track.dto.response.TrackPointsResponse;
+
 import com.likelion_collb.domain.track.service.TrackService;
-import com.likelion_collb.global.entity.BaseTimeEntity;
+
 import com.likelion_collb.global.response.BaseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

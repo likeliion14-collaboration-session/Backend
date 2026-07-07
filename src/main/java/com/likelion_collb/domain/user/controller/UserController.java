@@ -19,7 +19,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/login")
+    @PostMapping(value = "/login", consumes = "multipart/form-data")
     public ResponseEntity<BaseResponse<LoginResponse>> login(
             @Valid @ModelAttribute LoginRequest request) {
 
