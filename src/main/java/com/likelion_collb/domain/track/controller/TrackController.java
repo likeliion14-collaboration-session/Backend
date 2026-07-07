@@ -26,6 +26,9 @@ public class TrackController {
     private final TrackService trackService;
 
     //기록 시작
+    /**
+     * @param request: userID
+     */
     @PostMapping("/records/start")
     public ResponseEntity<BaseResponse<RecordStartResponse>> startRecord(
             @Valid @RequestBody RecordStartRequest request) {
@@ -39,6 +42,11 @@ public class TrackController {
 
 
     //위치 저장 (3초 폴링 이용, liveLocation과 trackPoint 모두 업데이트)
+
+    /**
+     * @param request: userId, latitude, longitude
+     * @return
+     */
     @PostMapping("/locations")
     public ResponseEntity<BaseResponse<LocationSaveResponse>> saveLocation(@RequestBody @Valid LocationSaveRequest request) {
 
@@ -52,6 +60,13 @@ public class TrackController {
     }
 
     // 동선 좌표 목록 조회 (targetId 생략 시 본인 조회)
+
+    /**
+     * @param requesterId
+     * @param targetId
+     * @param date
+     * @return
+     */
     @GetMapping("/track-points")
     public ResponseEntity<BaseResponse<TrackPointsResponse>> getTrackPoints(
             @RequestParam Long requesterId,
@@ -66,6 +81,12 @@ public class TrackController {
     }
 
     // 현재 위치 조회 (targetId 생략 시 본인 조회)
+
+    /**
+     * @param requesterId
+     * @param targetId
+     * @return
+     */
     @GetMapping("/users/live-location")
     public ResponseEntity<BaseResponse<LiveLocationResponse>> getLiveLocation(
             @RequestParam Long requesterId,
